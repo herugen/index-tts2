@@ -1,0 +1,350 @@
+openapi: 3.0.3
+info:
+  title: IndexTTS HTTP Service
+  description: IndexTTS HTTP Service allow you to synthesize speech from text or audio with emotion control.
+  version: 1.1.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+security: []
+servers:
+  - url: /
+paths:
+  /synthesize/speaker:
+    post:
+      operationId: synthesize_speaker
+      summary: Synthesize text with speaker's voice and emotion
+      description: Clone the speaker's voice and synthesize text with emotion.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Speaker'
+      responses:
+        '200':
+          description: Base64 WAV audio (JSON string)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudioWav'
+        '429':
+          description: Busy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /synthesize/reference:
+    post:
+      operationId: synthesize_reference
+      summary: Synthesize text with speaker's voice and reference audio's emotion
+      description: Use separate emotion from reference audio to control the emotion of the speech.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReferenceAudio'
+      responses:
+        '200':
+          description: Base64 WAV audio (JSON string)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudioWav'
+        '429':
+          description: Busy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /synthesize/vector:
+    post:
+      operationId: synthesize_vector
+      summary: Synthesize text with speaker's voice and emotion factors
+      description: Use named emotion factors to control the emotion of the speech.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vectors'
+      responses:
+        '200':
+          description: Base64 WAV audio (JSON string)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudioWav'
+        '429':
+          description: Busy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /synthesize/text:
+    post:
+      operationId: synthesize_text
+      summary: Synthesize text with speaker's voice and emotion text
+      description: Use emotion text to control the emotion of the speech.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TextPrompt'
+      responses:
+        '200':
+          description: Base64 WAV audio (JSON string)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudioWav'
+        '429':
+          description: Busy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Base:
+      type: object
+      properties:
+        prompt_audio:
+          type: string
+          format: byte
+          description: Base64-encoded speaker reference audio bytes (.wav).
+        text:
+          type: string
+          description: Target text to synthesize.
+        max_text_tokens_per_segment:
+          type: integer
+          default: 120
+          description: Max text tokens per segment (affects speed and quality).
+      required:
+        - prompt_audio
+        - text
+
+    GenerationArgs:
+      type: object
+      properties:
+        do_sample:
+          type: boolean
+          default: true
+          description: Enable sampling in the AR generator.
+        top_p:
+          type: number
+          format: float
+          default: 0.8
+          description: Nucleus sampling parameter.
+        top_k:
+          type: integer
+          default: 30
+          description: Top-K sampling parameter (0 disables).
+        temperature:
+          type: number
+          format: float
+          default: 0.8
+          description: Sampling temperature.
+        length_penalty:
+          type: number
+          format: float
+          default: 0.0
+          description: Beam search length penalty.
+        num_beams:
+          type: integer
+          default: 3
+          description: Number of beams for beam search.
+        repetition_penalty:
+          type: number
+          format: float
+          default: 10.0
+          description: Repetition penalty.
+        max_mel_tokens:
+          type: integer
+          default: 1500
+          description: Max mel tokens to generate (too small truncates audio).
+
+    EmotionFactors:
+      type: object
+      description: |
+        Emotion intensity factors (0.0–1.0 typical).
+      properties:
+        happy:
+          type: number
+          format: float
+        angry:
+          type: number
+          format: float
+        sad:
+          type: number
+          format: float
+        afraid:
+          type: number
+          format: float
+        disgusted:
+          type: number
+          format: float
+        melancholic:
+          type: number
+          format: float
+        surprised:
+          type: number
+          format: float
+        calm:
+          type: number
+          format: float
+          description: Factor for "calm"
+      required:
+        - happy
+        - angry
+        - sad
+        - afraid
+        - disgusted
+        - melancholic
+        - surprised
+        - calm
+      example:
+        happy: 0.6
+        angry: 0.0
+        sad: 0.0
+        afraid: 0.0
+        disgusted: 0.0
+        melancholic: 0.2
+        surprised: 0.2
+        calm: 0.0
+
+    Speaker:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          properties:
+            generation_args:
+              $ref: '#/components/schemas/GenerationArgs'
+          required:
+            - generation_args
+
+    ReferenceAudio:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          properties:
+            generation_args:
+              $ref: '#/components/schemas/GenerationArgs'
+            emotion_audio:
+              type: string
+              format: byte
+              description: Base64-encoded emotion reference audio bytes (.wav). Required.
+            emotion_weight:
+              type: number
+              format: float
+              default: 0.8
+              description: Strength for emotion reference audio; internally scaled by 0.8.
+          required:
+            - generation_args
+            - emotion_audio
+
+    Vectors:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          properties:
+            generation_args:
+              $ref: '#/components/schemas/GenerationArgs'
+            emotion_factors:
+              $ref: '#/components/schemas/EmotionFactors'
+            emotion_random:
+              type: boolean
+              default: false
+              description: Enables stochastic emotion sampling (lower voice cloning fidelity).
+          required:
+            - emotion_factors
+            - generation_args
+
+    TextPrompt:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          properties:
+            generation_args:
+              $ref: '#/components/schemas/GenerationArgs'
+            emotion_text:
+              type: string
+              nullable: true
+              description: Emotion description text (empty treated as null).
+            emotion_random:
+              type: boolean
+              default: false
+              description: Enables stochastic emotion sampling (lower voice cloning fidelity).
+          required:
+            - generation_args
+            - emotion_text
+
+    AudioWav:
+      type: string
+      format: byte
+      description: Base64-encoded WAV audio bytes
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message

@@ -1,0 +1,26 @@
+services:
+  indextts-http:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: indextts-http
+    ports:
+      - "9010:9010"
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com
+      - USE_FP16=0
+      - USE_CUDA_KERNEL=0
+    volumes:
+      - ./huggingface:/root/.cache/huggingface
+      - ./checkpoints:/app/checkpoints
+      - ./prompt_cache:/app/prompt_cache
+    restart: unless-stopped
+    # If you plan to run on NVIDIA GPU, you can try enabling GPU support (requires recent Docker + drivers):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    #   Note: You may also set USE_FP16=1 and USE_CUDA_KERNEL=1 above when using GPU.
