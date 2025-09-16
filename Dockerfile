@@ -8,8 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg git && rm -rf /var/lib/apt/lists/*
 
 # CUDA 12.8 wheels for torch/torchaudio, then IndexTTS from default branch, then service deps (no DeepSpeed)
-RUN pip install "torch==2.8.*" "torchaudio==2.8.*" && \
-    pip install "indextts @ git+https://github.com/index-tts/index-tts" && \
+RUN pip install "indextts @ git+https://github.com/herugen/index-tts@6f3122d92c588f0f130493c6b59d08a381753881" && \
     pip install fastapi==0.115.0 "uvicorn[standard]==0.30.6"
 
 COPY main.py .
