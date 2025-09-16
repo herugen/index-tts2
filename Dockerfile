@@ -8,10 +8,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg git && r
 
 # install index-tts and dependencies
 WORKDIR /
-RUN git clone https://github.com/herugen/index-tts.git
-WORKDIR /index-tts
-RUN pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple "torch==2.8.*" "torchaudio==2.8.*"
-RUN pip install -e . 
+RUN git clone https://github.com/index-tts/index-tts.git \
+    && pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple "torch==2.8.*" "torchaudio==2.8.*" \
+    && pip install /index-tts \
+    && rm -rf /index-tts
 
 WORKDIR /app
 COPY main.py .
