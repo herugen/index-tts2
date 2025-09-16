@@ -28,9 +28,6 @@ IndexTTS HTTP Service 提供基于 IndexTTS-2 的文本转语音（TTS）能力�
 ### 方法一：使用 Makefile（推荐）
 
 ```bash
-# 构建镜像
-make build
-
 # 下载模型到本地 checkpoints/（首次运行需要）
 make download
 
@@ -46,9 +43,13 @@ make stop
 
 服务启动后，默认地址为 `http://localhost:9010`。
 
-### 方法二：docker-compose
+### 方法二：docker-compose（使用 GHCR 镜像）
 
 ```bash
+# 首次下载模型权重（到本地目录）
+make download
+
+# 启动
 docker compose up -d
 ```
 
@@ -63,20 +64,6 @@ docker compose up -d
   - `USE_CUDA_KERNEL=0|1`
 
 如使用 NVIDIA GPU，可参考 `docker-compose.yml` 注释启用 `deploy.resources.devices`，并将 `USE_FP16/USE_CUDA_KERNEL` 设置为 `1`（需正确安装驱动及满足 Docker 版本要求）。
-
-### 方法三：直接使用 Dockerfile
-
-镜像构建时已安装：
-
-- `torch==2.8.*`、`torchaudio==2.8.*`
-- `indextts @ git+https://github.com/index-tts/index-tts`
-- `fastapi==0.115.0`、`uvicorn[standard]==0.30.6`
-
-容器入口：
-
-```bash
-uvicorn main:app --host 0.0.0.0 --port 9010 --workers 1 --timeout-keep-alive 1800
-```
 
 ## 环境变量
 
