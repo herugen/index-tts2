@@ -7,11 +7,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg git && rm -rf /var/lib/apt/lists/*
 
 # install index-tts and dependencies
-WORKDIR /
-RUN git clone https://github.com/index-tts/index-tts.git \
-    && pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple "torch==2.8.*" "torchaudio==2.8.*" \
-    && pip install -e /index-tts \
-    && rm -rf /index-tts
+RUN pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple "torch==2.8.*" "torchaudio==2.8.*" \
+    && pip install "git+https://github.com/index-tts/index-tts.git"
 RUN pip install fastapi==0.115.0 "uvicorn[standard]==0.30.6"
 
 WORKDIR /app
